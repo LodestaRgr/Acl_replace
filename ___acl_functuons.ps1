@@ -1,4 +1,4 @@
-# Функция для чтения содержимого файла JSON и преобразования его в объект PowerShell
+п»ї# Р¤СѓРЅРєС†РёСЏ РґР»СЏ С‡С‚РµРЅРёСЏ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»Р° JSON Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РµРіРѕ РІ РѕР±СЉРµРєС‚ PowerShell
 function Read-JsonFile {
     param (
         [string]$Path
@@ -6,7 +6,7 @@ function Read-JsonFile {
     Get-Content -Raw -Path $Path | ConvertFrom-Json
 }
 
-# Функция для чтения содержимого файла CSV и преобразования его в объект PowerShell
+# Р¤СѓРЅРєС†РёСЏ РґР»СЏ С‡С‚РµРЅРёСЏ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»Р° CSV Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РµРіРѕ РІ РѕР±СЉРµРєС‚ PowerShell
 function Read-CsvFile {
     param (
         [string]$Path
@@ -14,7 +14,7 @@ function Read-CsvFile {
     Import-Csv -Path $Path
 }
 
-# Функция для записи объекта PowerShell в файл JSON
+# Р¤СѓРЅРєС†РёСЏ РґР»СЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р° PowerShell РІ С„Р°Р№Р» JSON
 function Write-JsonFile {
     param (
         [object]$Object,
@@ -23,7 +23,7 @@ function Write-JsonFile {
     $Object | ConvertTo-Json -Depth 2 -Compress | Set-Content -Path $Path
 }
 
-# Функция для записи объекта PowerShell в файл Csv
+# Р¤СѓРЅРєС†РёСЏ РґР»СЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р° PowerShell РІ С„Р°Р№Р» Csv
 function Write-Csv {
     param (
         [object]$Object,
@@ -37,7 +37,7 @@ function Write-Csv {
     } | Export-Csv -Path $Path -Encoding UTF8 -NoTypeInformation
 }
 
-# Функция для получения SID пользователя через вызов WinAPI
+# Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ SID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· РІС‹Р·РѕРІ WinAPI
 function Get-SID {
     param (
         [string]$Username
@@ -52,7 +52,7 @@ function Get-SID {
     }
 }
 
-# Получить информацию о правах доступа к элементу
+# РџРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїСЂР°РІР°С… РґРѕСЃС‚СѓРїР° Рє СЌР»РµРјРµРЅС‚Сѓ
 function Get-AclInfo {
     param (
         [object]$Acl,
@@ -60,9 +60,9 @@ function Get-AclInfo {
     )
     $elements = @()
 
-    # Проверить, если права доступа не наследуются
+    # РџСЂРѕРІРµСЂРёС‚СЊ, РµСЃР»Рё РїСЂР°РІР° РґРѕСЃС‚СѓРїР° РЅРµ РЅР°СЃР»РµРґСѓСЋС‚СЃСЏ
     if (-not (AreAccessRulesInherited $Acl)) {
-        #Write-Host $($Path)
+        Write-Host $($Path)
         foreach ($Ace in $Acl.GetAccessRules($true, $true, [System.Security.Principal.SecurityIdentifier])) {
             $elements += @{
                 name = $($Path)

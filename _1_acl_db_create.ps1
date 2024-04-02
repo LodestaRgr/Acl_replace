@@ -32,7 +32,6 @@ foreach ($directoryPath in $directoryPaths) {
     $acl = [System.IO.Directory]::GetAccessControl($directoryPath)
 
     $elements += Get-AclInfo -Acl $acl -Path $directoryPath
-    Write-Host $directoryPath
 
     # Рекурсивно просканировать директорию, начиная с самой папки test2, и получить информацию о правах доступа для элементов
     Get-ChildItem -Path $directoryPath -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
@@ -45,7 +44,6 @@ foreach ($directoryPath in $directoryPaths) {
         }
 
         $elements += Get-AclInfo -Acl $acl -Path $item.FullName
-        Write-Host $item.FullName
     }
 
 }

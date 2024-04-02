@@ -1,71 +1,72 @@
-# !!! Обязательно !!! указать в формате "Имя компьютера или имя домена\Имя пользователя"
-# пример: $SourceUser = "User-PC\user" - это локальный пользователь 
-# пример: $TargetUser = "domain\user"     - это доменный пользователь (или "user@domain")
+п»ї# !!! РћР±СЏР·Р°С‚РµР»СЊРЅРѕ !!! СѓРєР°Р·Р°С‚СЊ РІ С„РѕСЂРјР°С‚Рµ "РРјСЏ РєРѕРјРїСЊСЋС‚РµСЂР° РёР»Рё РёРјСЏ РґРѕРјРµРЅР°\РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ"
+# РїСЂРёРјРµСЂ: $SourceUser = "User-PC\user" - СЌС‚Рѕ Р»РѕРєР°Р»СЊРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ 
+# РїСЂРёРјРµСЂ: $TargetUser = "domain\user"     - СЌС‚Рѕ РґРѕРјРµРЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ (РёР»Рё "user@domain")
 
 $SourceUser = "wsy07\kiosk"
 $TargetUser = "wsy07\it"
 
 cls
 
-# Подгрузка функций из файла functions.ps1
+# РџРѕРґРіСЂСѓР·РєР° С„СѓРЅРєС†РёР№ РёР· С„Р°Р№Р»Р° functions.ps1
 . ".\___acl_functuons.ps1"
 
-# Чтение содержимого файла JSON
+# Р§С‚РµРЅРёРµ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»Р° JSON
 #$elements = Read-JsonFile -Path "elements.json"
 $elements = Read-CsvFile -Path "elements.csv"
 
-# Получение SID пользователя
+# РџРѕР»СѓС‡РµРЅРёРµ SID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 $SID = Get-SID -Username $SourceUser
 $SIDnew = Get-SID -Username $TargetUser
 
 if ($SID -eq $false -or $SIDnew -eq $false) {
-    Write-Output "Пользователь отсутствует!"
+    Write-Output "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚!"
     exit 1
 }
-write-host "Старый пользователь:`t$SID`t$SourceUser"
-write-host "Новый  пользователь:`t$SIDnew`t$TargetUser`n"
+write-host "РЎС‚Р°СЂС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ:`t$SID`t$SourceUser"
+write-host "РќРѕРІС‹Р№  РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ:`t$SIDnew`t$TargetUser`n"
 
-# Поиск элементов, содержащих указанную строку в SID
+# РџРѕРёСЃРє СЌР»РµРјРµРЅС‚РѕРІ, СЃРѕРґРµСЂР¶Р°С‰РёС… СѓРєР°Р·Р°РЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ РІ SID
 $matchingElements = $elements | Where-Object { $_.SID -match $SID }
 
-# Вывод соответствующих элементов на экран
+# Р’С‹РІРѕРґ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… СЌР»РµРјРµРЅС‚РѕРІ РЅР° СЌРєСЂР°РЅ
 #$matchingElements
 
 if ($matchingElements -ne $null) {
 
-    Write-Host "Найдено " $matchingElements.Count " элементa(ов).`n"
+    Write-Host "РќР°Р№РґРµРЅРѕ " $matchingElements.Count " СЌР»РµРјРµРЅС‚a(РѕРІ).`n"
 
-    # Проходим по каждому найденному элементу и заменяем $SourceUser на $TargetUser
+    # РџСЂРѕС…РѕРґРёРј РїРѕ РєР°Р¶РґРѕРјСѓ РЅР°Р№РґРµРЅРЅРѕРјСѓ СЌР»РµРјРµРЅС‚Сѓ Рё Р·Р°РјРµРЅСЏРµРј $SourceUser РЅР° $TargetUser
     foreach ($matchingElement in $matchingElements) {
     
-        $currentAcl = Get-Acl -Path $matchingElement.name
-        $currentAccessRules = $currentAcl.Access | Where-Object { -not $_.IsInherited } # получить только не наследуемые права
+        #$currentAcl = Get-Acl -Path $matchingElement.name
+        $currentAcl = (Get-Item $matchingElement.name).GetAccessControl('access')
+        $currentAccessRules = $currentAcl.Access | Where-Object { -not $_.IsInherited } # РїРѕР»СѓС‡РёС‚СЊ С‚РѕР»СЊРєРѕ РЅРµ РЅР°СЃР»РµРґСѓРµРјС‹Рµ РїСЂР°РІР°
 
-        $count = 1 # счетчик правил в элементе
+        $count = 1 # СЃС‡РµС‚С‡РёРє РїСЂР°РІРёР» РІ СЌР»РµРјРµРЅС‚Рµ
 
         foreach ($currentRule in $currentAccessRules) {
-            if ($currentRule.IdentityReference.Value -eq $SourceUser) { # если в правах найден пользователь
+            if ($currentRule.IdentityReference.Value -eq $SourceUser) { # РµСЃР»Рё РІ РїСЂР°РІР°С… РЅР°Р№РґРµРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
 
                 $updatedIdentity = $currentRule.IdentityReference.Value -replace [regex]::Escape($SourceUser), $TargetUser
 
                 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($updatedIdentity, $currentRule.FileSystemRights, $currentRule.InheritanceFlags, $currentRule.PropagationFlags, $currentRule.AccessControlType)
 
-                if ($currentAcl.RemoveAccessRule($currentRule)) { # удаления старого правила к текущему ACL
-                    $currentAcl.AddAccessRule($rule) # добавляем новое правило к текущему ACL
+                if ($currentAcl.RemoveAccessRule($currentRule)) { # СѓРґР°Р»РµРЅРёСЏ СЃС‚Р°СЂРѕРіРѕ РїСЂР°РІРёР»Р° Рє С‚РµРєСѓС‰РµРјСѓ ACL
+                    $currentAcl.AddAccessRule($rule) # РґРѕР±Р°РІР»СЏРµРј РЅРѕРІРѕРµ РїСЂР°РІРёР»Рѕ Рє С‚РµРєСѓС‰РµРјСѓ ACL
                 } else {
-                    Write-host "Ошибка при удалении старого правила в " $matchingElement.name
+                    Write-host "РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё СЃС‚Р°СЂРѕРіРѕ РїСЂР°РІРёР»Р° РІ " $matchingElement.name
                 }
 
-                # Пытаемся установить новые права доступа
+                # РџС‹С‚Р°РµРјСЃСЏ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РЅРѕРІС‹Рµ РїСЂР°РІР° РґРѕСЃС‚СѓРїР°
                 try {
                     Set-Acl -Path $matchingElement.name -AclObject $currentAcl -ErrorAction Stop
-                    Write-Host "Обновлено правило - $count : `t" $matchingElement.name
+                    Write-Host "РћР±РЅРѕРІР»РµРЅРѕ РїСЂР°РІРёР»Рѕ - $count : `t" $matchingElement.name
 
-                    # Обновляем информацию в базе $SID на $SIDnew
+                    # РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ РІ Р±Р°Р·Рµ $SID РЅР° $SIDnew
                     $elements | Where-Object { $_.name -eq $matchingElement.name } | ForEach-Object { $_.SID = $_.SID -replace $SID, $SIDnew }
 
                 } catch {
-                    Write-Host "Ошибка правила - $count : `t" $matchingElement.name " : $_"
+                    Write-Host "РћС€РёР±РєР° РїСЂР°РІРёР»Р° - $count : `t" $matchingElement.name " : $_"
                 }
 
                 $count += 1
@@ -73,11 +74,11 @@ if ($matchingElements -ne $null) {
         }
     }
 } else {
-    Write-Host "Не найдены элементы с пользователем."
+    Write-Host "РќРµ РЅР°Р№РґРµРЅС‹ СЌР»РµРјРµРЅС‚С‹ СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј."
     exit 1
 }
-# Сохраняем $elements в файл JSON
+# РЎРѕС…СЂР°РЅСЏРµРј $elements РІ С„Р°Р№Р» JSON
 #Write-JsonFile -Object $elements -Path "elements.json"
 Write-Csv -Object $elements -Path "elements.csv"
 
-Write-Host "`nОбновление завершено."
+Write-Host "`nРћР±РЅРѕРІР»РµРЅРёРµ Р·Р°РІРµСЂС€РµРЅРѕ."
